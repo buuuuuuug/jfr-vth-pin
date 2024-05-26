@@ -1,69 +1,28 @@
-# Getting Started
+## 当前的问题是：
 
-### Reference Documentation
-
-For further reference, please consider the following sections:
-
-* [Official Gradle documentation](https://docs.gradle.org)
-* [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/3.3.0/gradle-plugin/reference/html/)
-* [Create an OCI image](https://docs.spring.io/spring-boot/docs/3.3.0/gradle-plugin/reference/html/#build-image)
-* [GraalVM Native Image Support](https://docs.spring.io/spring-boot/docs/3.3.0/reference/html/native-image.html#native-image)
-* [Prometheus](https://docs.spring.io/spring-boot/docs/3.3.0/reference/htmlsingle/index.html#actuator.metrics.export.prometheus)
-
-### Additional Links
-
-These additional references should also help you:
-
-* [Gradle Build Scans – insights for your project's build](https://scans.gradle.com#gradle)
-* [Configure AOT settings in Build Plugin](https://docs.spring.io/spring-boot/docs/3.3.0/gradle-plugin/reference/htmlsingle/#aot)
-
-## GraalVM Native Support
-
-This project has been configured to let you generate either a lightweight container or a native executable.
-It is also possible to run your tests in a native image.
-
-### Lightweight Container with Cloud Native Buildpacks
-
-If you're already familiar with Spring Boot container images support, this is the easiest way to get started.
-Docker should be installed and configured on your machine prior to creating the image.
-
-To create the image, run the following goal:
-
+用jar包启动后
+```bash
+    java -jar build/libs/jfr-vth-pin-0.0.1-SNAPSHOT.jar
 ```
-$ ./gradlew bootBuildImage
+访问接口
+```bash
+    curl --request POST \
+         --url 'http://localhost:8080/pinning'
+```
+可以正常看到日志，来自 [JfrVirtualThreadPinnedEventHandler.java](src%2Fmain%2Fjava%2Fcom%2Fchaney%2Fjfrvthpin%2FJfrVirtualThreadPinnedEventHandler.java)
+![img.png](img/jar-pin-log.png)
+```text
+Thread '{}' pinned for: {}ms at {}, stacktrace
+```
+但是打包成native-image 可执行文件后，
+```groovy
+    gradle nativeCompile
+```
+启动
+```bash
+    ./build/native/nativeCompile/jfr-vth-pin -XX:StartFlightRecording="filename=recording.jfr,settings=continue+vth.jfc"
 ```
 
-Then, you can run the app like any other container:
-
-```
-$ docker run --rm jfr-vth-pin:0.0.1-SNAPSHOT
-```
-
-### Executable with Native Build Tools
-
-Use this option if you want to explore more options such as running your tests in a native image.
-The GraalVM `native-image` compiler should be installed and configured on your machine.
-
-NOTE: GraalVM 22.3+ is required.
-
-To create the executable, run the following goal:
-
-```
-$ ./gradlew nativeCompile
-```
-
-Then, you can run the app as follows:
-
-```
-$ build/native/nativeCompile/jfr-vth-pin
-```
-
-You can also run your existing tests suite in a native image.
-This is an efficient way to validate the compatibility of your application.
-
-To run your existing tests in a native image, run the following goal:
-
-```
-$ ./gradlew nativeTest
-```
+再次访问上面的接口，发现没有按照预期输出 虚拟线程pin日志
+![img.png](img/native-no-pin-log.png)
 
