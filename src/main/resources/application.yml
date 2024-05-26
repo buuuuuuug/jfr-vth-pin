@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: jfr-vth-pin
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: [ "prometheus" ]
