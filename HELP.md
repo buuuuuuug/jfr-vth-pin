@@ -22,7 +22,14 @@ Thread '{}' pinned for: {}ms at {}, stacktrace
 ```bash
     ./build/native/nativeCompile/jfr-vth-pin -XX:StartFlightRecording="filename=recording.jfr,settings=continue+vth.jfc"
 ```
-
+其中的 jfc文件 是开启了VirtualThreadPinned事件的
+```xml
+  <event name="jdk.VirtualThreadPinned">
+    <setting name="enabled">true</setting>
+    <setting name="stackTrace">true</setting>
+    <setting name="threshold">0 ns</setting>
+  </event>
+```
 再次访问上面的接口，发现没有按照预期输出 虚拟线程pin日志
 ![img.png](img/native-no-pin-log.png)
 
